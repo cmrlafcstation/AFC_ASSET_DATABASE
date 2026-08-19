@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Spare Movement - AFC Asset Management</title>
+<link rel="stylesheet" href="css/style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar-root"></aside>
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1>Spare Movement</h1>
+          <div class="subtitle">Record a transfer — Zone Store to Station, or Station to Station. Stock quantities update automatically.</div>
+        </div>
+        <a class="btn secondary" href="zone-store.html">&larr; Zone Store</a>
+      </header>
+
+      <div class="content">
+        <div class="panel">
+          <h2>1. Find &amp; Select Spare Stock or Installed Device</h2>
+          <p class="small text-muted" style="margin-top:-8px;">Searches Zone Store stock plus every AG, NCMC and QR device currently installed at a station.</p>
+          <div class="filter-bar">
+            <input type="text" id="stock-search" placeholder="Search Spare Part Name, Stock/Asset ID, or Location..." />
+            <select id="stock-search-location"><option value="">All locations</option></select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Spare Part / Device</th><th>Category</th><th>Location</th><th>Quantity</th><th></th></tr>
+              </thead>
+              <tbody id="stock-search-body"><tr><td colspan="6" class="loading-row">Loading&hellip;</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>2. Movement Details</h2>
+            <div id="selected-stock-banner" class="small text-muted" style="margin:-6px 0 14px;">No stock selected yet — pick one above, or fill in the fields manually.</div>
+            <form id="move-form">
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>Date</label>
+                  <input type="date" id="move-date" required />
+                </div>
+                <div class="form-field">
+                  <label>Spare Part Name *</label>
+                  <input type="text" id="spare-name" list="spare-name-list" placeholder="Start typing, or select above..." required />
+                  <datalist id="spare-name-list"></datalist>
+                </div>
+                <div class="form-field">
+                  <label>Category</label>
+                  <select id="move-category"><option value="">-- Select --</option></select>
+                </div>
+                <div class="form-field">
+                  <label>Quantity *</label>
+                  <input type="number" id="move-qty" min="1" step="any" required />
+                </div>
+                <div class="form-field">
+                  <label>From Location *</label>
+                  <select id="from-location" required><option value="">-- Select --</option></select>
+                </div>
+                <div class="form-field">
+                  <label>To Location *</label>
+                  <select id="to-location" required><option value="">-- Select --</option></select>
+                </div>
+                <div class="form-field full">
+                  <div id="available-hint" class="small text-muted"></div>
+                </div>
+                <div class="form-field">
+                  <label>Handled By</label>
+                  <input type="text" id="handled-by" placeholder="Name" />
+                </div>
+                <div class="form-field full">
+                  <label>Remarks</label>
+                  <textarea id="move-remarks" rows="2"></textarea>
+                </div>
+              </div>
+              <div class="modal-actions" style="justify-content:flex-start; margin-top:18px;">
+                <button type="submit" class="btn" id="move-submit-btn">Record Movement</button>
+              </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h3>How this works</h3>
+            <p class="small text-muted">
+              Search above for the spare or installed device you want to move and click
+              <strong>Select</strong> — its name, category and From Location fill in
+              automatically below, along with availability. Just enter the Quantity (for
+              spare stock) and To Location, then submit.
+            </p>
+            <p class="small text-muted">
+              <strong>Moving from Spare Stock</strong> decreases the quantity at the From
+              location and increases it at the To location, creating a stock record at the
+              destination if one doesn't exist yet. Blocked if there isn't enough stock at
+              the source.
+            </p>
+            <p class="small text-muted">
+              <strong>Moving an installed device is always quantity 1</strong> and what
+              happens next depends on the device and the To Location (a live hint appears
+              on the form once both are picked):
+            </p>
+            <p class="small text-muted">
+              &bull; <strong>NCMC / QR device &rarr; another station, or a Zone
+              (Zone 1/2/3)</strong>: the device is always fully <strong>relocated</strong>.
+              Its row is removed from the source sheet and re-created as a brand-new asset
+              record at the destination with a new Asset ID (all its other details — serial
+              number, MID/TID, manufacturer, install date, etc. — carry over). If it's
+              headed to a Zone, its status also flips to "Non Operational" / "Under Repair"
+              at the destination. Spare Stock / Zone Store is never touched by these moves —
+              it only ever holds genuine spare-parts stock added manually.
+            </p>
+            <p class="small text-muted">
+              &bull; <strong>AG component (FEIG reader / QR scanner) &rarr; anywhere</strong>:
+              marked unavailable on the original AG gate record instead of being relocated,
+              since it's one component embedded in a shared gate row, not a standalone
+              record — its Availability is set to "No" and a note is added to Remarks. A
+              matching spare stock entry is created (or topped up) at the To location.
+            </p>
+        </div>
+
+        <div class="panel">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+            <h2 style="margin:0;">Recent Movements</h2>
+            <button class="btn secondary" id="download-excel-btn">&darr; Download Excel</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Movement ID</th><th>Date</th><th>Spare Part</th><th>Category</th>
+                  <th>Qty</th><th>From &rarr; To</th><th>Type</th><th>Handled By</th>
+                </tr>
+              </thead>
+              <tbody id="movement-table-body"><tr><td colspan="8" class="loading-row">Loading&hellip;</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/spare-movement.js"></script>
+</body>
+</html>

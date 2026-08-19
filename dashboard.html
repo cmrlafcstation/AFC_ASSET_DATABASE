@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard - AFC Asset Management</title>
+<link rel="stylesheet" href="css/style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar-root"></aside>
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1>Dashboard</h1>
+          <div class="subtitle">Overall AFC asset summary</div>
+        </div>
+        <button class="btn secondary" id="download-report-btn">&darr; Download Report</button>
+      </header>
+
+      <div class="content">
+        <div class="stat-grid" id="stat-grid">
+          <div class="loading-row">Loading summary&hellip;</div>
+        </div>
+
+        <div class="panel">
+          <h2>Search assets</h2>
+          <div class="filter-bar">
+            <input type="text" id="search-q" placeholder="Search Asset ID, Device ID, Serial No, MID, TID, Gate No, IP Address..." />
+            <select id="search-system">
+              <option value="All">All systems</option>
+              <option value="AG">AG</option>
+              <option value="NCMC">NCMC</option>
+              <option value="QR">QR</option>
+            </select>
+            <select id="search-station"><option value="All">All stations</option></select>
+            <select id="search-status">
+              <option value="All">All status</option>
+              <option value="Operational">Operational</option>
+              <option value="Staff">Staff</option>
+              <option value="Non Operational">Non Operational</option>
+            </select>
+            <button class="btn" id="search-btn">Search</button>
+          </div>
+          <div class="table-wrap">
+            <table id="search-results-table" style="display:none;">
+              <thead>
+                <tr><th>System</th><th>Asset ID</th><th>Station</th><th>Status</th><th>Last Updated</th><th></th></tr>
+              </thead>
+              <tbody id="search-results-body"></tbody>
+            </table>
+            <div id="search-placeholder" class="empty-row">Search results will appear here.</div>
+          </div>
+        </div>
+
+        <div class="panel-grid">
+          <div class="panel">
+            <h2>Station-wise assets</h2>
+            <p class="small text-muted" style="margin-top:-8px;">AG is a raw device count. NCMC/QR are Set counts (each unique Counter Type + Counter Number combination counts once).</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Station</th><th>AG</th><th>NCMC (Sets)</th><th>QR (Sets)</th><th>Total</th></tr></thead>
+                <tbody id="station-table-body"><tr><td colspan="5" class="loading-row">Loading&hellip;</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>Status monitoring</h2>
+            <div id="status-monitoring" class="loading-row">Loading&hellip;</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Counter-wise assets (TOM/EFO)</h2>
+          <p class="small text-muted" style="margin-top:-8px;">Number of NCMC/QR "sets" — each unique Station + Counter Type + Counter Number combination counts once, no matter how many device rows share it.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Counter Type</th><th>NCMC</th><th>QR</th><th>Total</th></tr></thead>
+              <tbody id="counter-table-body"><tr><td colspan="4" class="loading-row">Loading&hellip;</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Recently added / updated assets</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>System</th><th>Asset ID</th><th>Station</th><th>Last Updated</th><th></th></tr></thead>
+              <tbody id="recent-table-body"><tr><td colspan="5" class="loading-row">Loading&hellip;</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

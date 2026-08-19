@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zone Store - AFC Asset Management</title>
+<link rel="stylesheet" href="css/style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar-root"></aside>
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="page-title">Zone Store</h1>
+          <div class="subtitle" id="page-subtitle"></div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn secondary" id="download-excel-btn">&darr; Download Excel</button>
+          <button class="btn" id="add-btn">+ Add / Receive Stock</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="panel">
+          <div class="filter-bar">
+            <input type="text" id="filter-search" placeholder="Search Stock ID, Spare Part Name..." />
+            <select id="filter-station"><option value="">All locations</option></select>
+            <span class="spacer"></span>
+            <a class="btn secondary" href="spare-movement.html">Record a Movement &rarr;</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead id="table-head"></thead>
+              <tbody id="table-body"><tr><td class="loading-row">Loading&hellip;</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const SYSTEM_CONFIG = {
+      key: 'SPARE',
+      title: 'Zone Store',
+      subtitle: 'Spare parts stock — Zone 1, Zone 2, Zone 3 (station stock is kept in sync automatically via Spare Movement)',
+      idLabel: 'Stock ID',
+      itemLabel: 'Stock Entry',
+      itemLabelPlural: 'Stock Entries',
+      statusField: null,
+      groupField: { name: 'Location', label: 'Location', settingsKeys: ['Zones', 'Stations'] },
+      addHelpText: 'Adding tops up the existing quantity for this Spare Part + Location, or creates a new stock record if none exists yet. To move stock between locations, use "Record a Movement" instead.',
+      editHelpText: 'Editing sets the exact values for this record — use this to correct a stock count or fix a typo, not for day-to-day transfers.',
+      listColumns: [
+        { key: 'Category', label: 'Category' },
+        { key: 'Quantity', label: 'Quantity' },
+        { key: 'Unit', label: 'Unit' },
+        { key: 'MinLevel', label: 'Min Level' }
+      ],
+      sections: [
+        {
+          title: 'Spare Stock',
+          fields: [
+            { name: 'SparePartName', label: 'Spare Part Name', type: 'text', required: true },
+            { name: 'Category', label: 'Category', type: 'select', settingsKey: 'SpareCategories' },
+            { name: 'Location', label: 'Location', type: 'select', settingsKeys: ['Zones', 'Stations'], required: true },
+            { name: 'Quantity', label: 'Quantity', type: 'number', required: true },
+            { name: 'Unit', label: 'Unit (pcs, box, set...)', type: 'text' },
+            { name: 'MinLevel', label: 'Minimum Stock Level', type: 'number' },
+            { name: 'Remarks', label: 'Remarks', type: 'textarea', full: true }
+          ]
+        }
+      ]
+    };
+  </script>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/asset-page.js"></script>
+</body>
+</html>

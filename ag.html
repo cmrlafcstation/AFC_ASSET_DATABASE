@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AG System - AFC Asset Management</title>
+<link rel="stylesheet" href="css/style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar-root"></aside>
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="page-title">AG System</h1>
+          <div class="subtitle" id="page-subtitle"></div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn secondary" id="download-excel-btn">&darr; Download Excel</button>
+          <button class="btn secondary" id="bulk-upload-btn">Upload Excel</button>
+          <button class="btn" id="add-btn">+ Add New Asset</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="panel">
+          <div class="filter-bar">
+            <input type="text" id="filter-search" placeholder="Search Asset ID, Gate No, Device ID, Serial No, IP..." />
+            <select id="filter-station"><option value="">All stations</option></select>
+            <select id="filter-status">
+              <option value="">All status</option>
+              <option value="Operational">Operational</option>
+              <option value="Staff">Staff</option>
+              <option value="Non Operational">Non Operational</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead id="table-head"></thead>
+              <tbody id="table-body"><tr><td class="loading-row">Loading&hellip;</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const SYSTEM_CONFIG = {
+      key: 'AG',
+      title: 'AG System',
+      subtitle: 'Automatic Gates — gate, FEIG reader & QR scanner assets',
+      addHelpText: 'Set Gate Type to "Bi-directional" to reveal a second FEIG Reader and QR Scanner section below — bi-directional gates carry 2 of each (one facing each direction).',
+      editHelpText: 'Set Gate Type to "Bi-directional" to reveal a second FEIG Reader and QR Scanner section below — bi-directional gates carry 2 of each (one facing each direction).',
+      listColumns: [
+        { key: 'EquipmentType', label: 'Equipment Type' },
+        { key: 'GateNo', label: 'Gate No' },
+        { key: 'DeviceID', label: 'Device ID' },
+        { key: 'GateType', label: 'Gate Type' }
+      ],
+      sections: [
+        {
+          title: 'Gate Details',
+          fields: [
+            { name: 'Station', label: 'Station', type: 'select', settingsKey: 'Stations', required: true },
+            { name: 'EquipmentType', label: 'Equipment Type', type: 'select', settingsKey: 'AG_EquipmentTypes' },
+            { name: 'GateNo', label: 'Gate No', type: 'text' },
+            { name: 'DeviceID', label: 'Device ID', type: 'text' },
+            { name: 'GateType', label: 'Gate Type (Entry/Exit/Bi-directional)', type: 'select', settingsKey: 'GateTypes' },
+            { name: 'GateDirection', label: 'Gate Direction', type: 'select', settingsKey: 'GateDirections' },
+            { name: 'OperationalStatus', label: 'Operational Status', type: 'select', settingsKey: 'OperationalStatus' },
+            { name: 'InstallDate', label: 'Install Date', type: 'date' },
+            { name: 'Remarks', label: 'Remarks', type: 'textarea', full: true }
+          ]
+        },
+        {
+          title: 'FEIG Reader',
+          fields: [
+            { name: 'FEIG_Availability', label: 'Availability', type: 'select', settingsKey: 'Availability' },
+            { name: 'FEIG_SerialNo', label: 'Serial No', type: 'text' },
+            { name: 'FEIG_IPAddress', label: 'IP Address', type: 'text' },
+            { name: 'FEIG_NMS', label: 'Connected to NMS', type: 'select', settingsKey: 'NMSStatus' }
+          ]
+        },
+        {
+          title: 'QR Scanner',
+          fields: [
+            { name: 'QR_Availability', label: 'Availability', type: 'select', settingsKey: 'Availability' },
+            { name: 'QR_SerialNo', label: 'Serial No', type: 'text' },
+            { name: 'QR_IPAddress', label: 'IP Address', type: 'text' },
+            { name: 'QR_NMS', label: 'Connected to NMS', type: 'select', settingsKey: 'NMSStatus' }
+          ]
+        },
+        {
+          title: 'FEIG Reader 2 (Bi-directional gates only)',
+          showIf: { field: 'GateType', equals: 'Bi-directional' },
+          fields: [
+            { name: 'FEIG2_Availability', label: 'Availability', type: 'select', settingsKey: 'Availability' },
+            { name: 'FEIG2_SerialNo', label: 'Serial No', type: 'text' },
+            { name: 'FEIG2_IPAddress', label: 'IP Address', type: 'text' },
+            { name: 'FEIG2_NMS', label: 'Connected to NMS', type: 'select', settingsKey: 'NMSStatus' }
+          ]
+        },
+        {
+          title: 'QR Scanner 2 (Bi-directional gates only)',
+          showIf: { field: 'GateType', equals: 'Bi-directional' },
+          fields: [
+            { name: 'QR2_Availability', label: 'Availability', type: 'select', settingsKey: 'Availability' },
+            { name: 'QR2_SerialNo', label: 'Serial No', type: 'text' },
+            { name: 'QR2_IPAddress', label: 'IP Address', type: 'text' },
+            { name: 'QR2_NMS', label: 'Connected to NMS', type: 'select', settingsKey: 'NMSStatus' }
+          ]
+        }
+      ]
+    };
+  </script>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/asset-page.js"></script>
+  <script src="js/bulk-upload.js"></script>
+</body>
+</html>

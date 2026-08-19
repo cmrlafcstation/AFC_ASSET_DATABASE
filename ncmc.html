@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NCMC System - AFC Asset Management</title>
+<link rel="stylesheet" href="css/style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar-root"></aside>
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="page-title">NCMC System</h1>
+          <div class="subtitle" id="page-subtitle"></div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn secondary" id="download-excel-btn">&darr; Download Excel</button>
+          <button class="btn secondary" id="bulk-upload-btn">Upload Excel</button>
+          <button class="btn" id="add-btn">+ Add New Asset</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="panel">
+          <h2>Station-wise assets (TOM/EFO)</h2>
+          <p class="small text-muted" style="margin-top:-8px;">Number of NCMC Sets per station — each unique Counter Type + Counter Number combination counts once, no matter how many device rows share it.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Station</th><th>TOM</th><th>EFO</th><th>Total</th></tr></thead>
+              <tbody id="counter-summary-body"><tr><td colspan="4" class="loading-row">Loading&hellip;</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="filter-bar">
+            <input type="text" id="filter-search" placeholder="Search Asset ID, Counter, Serial No, MID, TID..." />
+            <select id="filter-station"><option value="">All stations</option></select>
+            <select id="filter-counter-type"><option value="">All Counters (TOM/EFO)</option></select>
+            <select id="filter-status">
+              <option value="">All status</option>
+              <option value="Operational">Operational</option>
+              <option value="Staff">Staff</option>
+              <option value="Non Operational">Non Operational</option>
+            </select>
+          </div>
+          <div id="counter-number-picker" style="display:none; margin-bottom:14px;"></div>
+          <div class="table-wrap">
+            <table>
+              <thead id="table-head"></thead>
+              <tbody id="table-body"><tr><td class="loading-row">Loading&hellip;</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const SYSTEM_CONFIG = {
+      key: 'NCMC',
+      title: 'NCMC System',
+      subtitle: 'National Common Mobility Card equipment',
+      listColumns: [
+        { key: 'EquipmentType', label: 'Equipment Type' },
+        { key: 'CounterType', label: 'Counter' },
+        { key: 'CounterNumber', label: 'Counter No.' },
+        { key: 'SerialNumber', label: 'Serial Number' },
+        { key: 'MID', label: 'MID' }
+      ],
+      sections: [
+        {
+          title: 'NCMC Equipment',
+          fields: [
+            { name: 'Station', label: 'Station', type: 'select', settingsKey: 'Stations', required: true },
+            { name: 'EquipmentType', label: 'Equipment Type', type: 'select', settingsKey: 'NCMC_EquipmentTypes' },
+            { name: 'CounterType', label: 'Counter (TOM/EFO)', type: 'select', settingsKey: 'CounterTypes' },
+            { name: 'CounterNumber', label: 'Counter Number', type: 'text' },
+            { name: 'SerialNumber', label: 'Serial Number', type: 'text' },
+            { name: 'MID', label: 'MID', type: 'text' },
+            { name: 'TID', label: 'TID', type: 'text' },
+            { name: 'Manufacturer', label: 'Manufacturer', type: 'text' },
+            { name: 'Model', label: 'Model', type: 'text' },
+            { name: 'OperationalStatus', label: 'Operational Status', type: 'select', settingsKey: 'OperationalStatus' },
+            { name: 'WorkingStatus', label: 'Working Status', type: 'select', settingsKey: 'WorkingStatus' },
+            { name: 'InstallDate', label: 'Install Date', type: 'date' },
+            { name: 'IPAddress', label: 'IP Address', type: 'text' },
+            { name: 'NMSStatus', label: 'Connected to NMS', type: 'select', settingsKey: 'NMSStatus' },
+            { name: 'Remarks', label: 'Remarks', type: 'textarea', full: true }
+          ]
+        }
+      ]
+    };
+  </script>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/asset-page.js"></script>
+  <script src="js/bulk-upload.js"></script>
+</body>
+</html>

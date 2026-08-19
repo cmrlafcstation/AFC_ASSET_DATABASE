@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SLE / Stations - AFC Asset Management</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar-root"></aside>
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1>SLE &ndash; Station Overview</h1>
+          <div class="subtitle">Select a station to see its AG / NCMC / QR asset counts</div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="panel">
+          <div class="filter-bar">
+            <input type="text" id="station-search" placeholder="Filter stations..." />
+            <span class="spacer"></span>
+            <a class="btn secondary" href="ag.html">All AG assets</a>
+            <a class="btn secondary" href="ncmc.html">All NCMC assets</a>
+            <a class="btn secondary" href="qr.html">All QR assets</a>
+          </div>
+          <div class="station-grid" id="station-grid">
+            <div class="loading-row">Loading stations&hellip;</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/sle.js"></script>
+</body>
+</html>
